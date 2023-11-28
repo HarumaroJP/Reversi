@@ -17,12 +17,12 @@ namespace Reversi
 		void WriteMessage();
 	public:
 		void WriteWelcomeMessage();
-		void WriteRetryMessage(bool invalid);
-		void WriteSelectTurnMessage(bool invalid);
-		void WriteResultMessage(int black_count, int white_count);
-		void WritePassMessage(Side side);
-		void WriteTurnMessage(Side player_turn, int max_depth);
-		void WriteSelectStrengthMessage(bool invalid);
+		void WriteRetryMessage(const bool invalid);
+		void WriteSelectTurnMessage(const bool invalid);
+		void WriteResultMessage(const int black_count, const int white_count);
+		void WritePassMessage(const Side side);
+		void WriteTurnMessage(const Side player_turn, const int max_depth);
+		void WriteSelectStrengthMessage(const bool invalid, const int min_strength, const int max_strength);
 		void WriteGameStartMessage();
 	};
 }

@@ -18,6 +18,33 @@ namespace Reversi
 		rand_module.seed(1234);
 	}
 
+	void GameSequencer::Start()
+	{
+		// 外部に公開するものをできる限り減らしましょう
+		// これら全てはこのクラス内限定使用で問題ありません。
+
+		while (current_state != State::Stop)
+		{
+			//オセロボードの表示
+			Refresh();
+
+			//ターン選択
+			AskSelectTurn();
+
+			//敵の強さ選択
+			AskSelectStrength();
+
+			//ゲーム中のループ
+			InGameLoop();
+
+			if (current_state == State::End)
+			{
+				//リトライ選択
+				AskRetry();
+			}
+		}
+	}
+
 	//インゲームのメインループ
 	void GameSequencer::InGameLoop()
 	{
@@ -45,7 +72,6 @@ namespace Reversi
 			{
 				if (current_turn == player_turn)
 				{
-					current_state = State::Invalid;
 					PlayerTurn();
 
 					if (current_state == State::Stop || current_state == State::Restart || current_state == State::End)
@@ -101,30 +127,32 @@ namespace Reversi
 
 	void GameSequencer::PlayerTurn()
 	{
-		while (current_state == State::Invalid)
+		// doループにすることで、PlayerTurn()を呼ぶ前のcurrent_stateの初期化を減らせます。
+		// whileループが好みなら、この関数内で初期化すると良いでしょう。呼び出し側の初期化忘れを減らせます。
+		do
 		{
 			//コマンド情報を取得
 			Command command = reader.ReadCommand();
 			current_state = command.state;
 
-			if (current_state == State::Set)
-			{
-				u64 legal_moves = board->GetLegalMoves(current_turn);
+			// ネストを深くしないように早期コンティニューさせる
+			if (current_state != State::Set) continue;
 
-				//配置できる場所だったら設置
-				if (command.IsLegalMove(legal_moves))
-				{
-					board->Set(command.set, current_turn);
-					board->Flip(command.set, current_turn);
-					prev_input = command.set;
-				}
-				else
-				{
-					current_state = State::Invalid;
-					std::wcout << L"その場所に置くことはできません" << std::endl;
-				}
+			u64 legal_moves = board->GetLegalMoves(current_turn);
+
+			//配置できる場所だったら設置
+			if (command.IsLegalMove(legal_moves))
+			{
+				board->Set(command.set, current_turn);
+				board->Flip(command.set, current_turn);
+				prev_input = command.set;
 			}
-		}
+			else
+			{
+				current_state = State::Invalid;
+				std::wcout << L"その場所に置くことはできません" << std::endl;
+			}
+		} while (current_state == State::Invalid);
 	}
 
 	void GameSequencer::EnemyTurn()
@@ -152,14 +180,14 @@ namespace Reversi
 
 		do
 		{
-			message_writer->WriteSelectStrengthMessage(invalid);
+			message_writer->WriteSelectStrengthMessage(invalid, MIN_STRENGTH, MAX_STRENGTH);
 			invalid = false;
 
 			std::wcin >> input_buffer;
 
 			int strength = std::stoi(input_buffer);
 
-			if (1 <= strength && strength <= 10)
+			if (MIN_STRENGTH <= strength && strength <= MAX_STRENGTH)
 			{
 				engine.SetSearchDepth(strength);
 			}
@@ -197,11 +225,6 @@ namespace Reversi
 				invalid = true;
 			}
 		} while (invalid);
-	}
-
-	State GameSequencer::GetState()
-	{
-		return current_state;
 	}
 
 	BoardInfo GameSequencer::GetBoardInfo() const
@@ -264,7 +287,3 @@ namespace Reversi
 		return 1ull << legal_indexes[0];
 	}
 }
-
-
-
-

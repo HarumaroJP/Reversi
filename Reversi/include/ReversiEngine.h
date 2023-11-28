@@ -28,10 +28,10 @@ namespace Reversi
 		//マルチスレッドで探索する関数
 		u64 MakeBestMove_Parallel();
 
-		int GetSearchDepth();
-		void SetSearchDepth(int depth);
+		int GetSearchDepth() const;
+		void SetSearchDepth(const int depth);
 
-		void SetEvaluateSide(Reversi::Side side);
+		void SetEvaluateSide(const Reversi::Side side);
 	private:
 
 		std::shared_ptr<Board> board;

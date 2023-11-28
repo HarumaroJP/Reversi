@@ -15,7 +15,7 @@ namespace Reversi
 		getchar();
 	}
 
-	void MessageWriter::WritePassMessage(Side side)
+	void MessageWriter::WritePassMessage(const Side side)
 	{
 		std::wstring sideChar = side == Side::Black ? L"黒" : L"白";
 		write_buffer += sideChar + L"は石を置くことができません!\n";
@@ -27,7 +27,7 @@ namespace Reversi
 		std::this_thread::sleep_for(std::chrono::milliseconds((int)(wait_time * 1000)));
 	}
 
-	void MessageWriter::WriteTurnMessage(Side player_turn, int max_depth)
+	void MessageWriter::WriteTurnMessage(const Side player_turn, const int max_depth)
 	{
 		std::wstring player = L"プレイヤー ";
 		std::wstring enemy = L"敵AI Lv" + std::to_wstring(max_depth);
@@ -41,7 +41,7 @@ namespace Reversi
 		WriteMessage();
 	}
 
-	void MessageWriter::WriteResultMessage(int black_count, int white_count)
+	void MessageWriter::WriteResultMessage(const int black_count, const int white_count)
 	{
 		std::wstring result;
 
@@ -65,8 +65,7 @@ namespace Reversi
 		WriteMessage();
 	}
 
-
-	void MessageWriter::WriteSelectTurnMessage(bool invalid)
+	void MessageWriter::WriteSelectTurnMessage(const bool invalid)
 	{
 		if (invalid)
 		{
@@ -80,20 +79,20 @@ namespace Reversi
 	}
 
 
-	void MessageWriter::WriteSelectStrengthMessage(bool invalid)
+	void MessageWriter::WriteSelectStrengthMessage(const bool invalid, const int min_strength, const int max_strength)
 	{
 		if (invalid)
 		{
-			write_buffer += L"\n1 ~ 10で入力してください。\n";
+			write_buffer += (L"\n" + std::to_wstring(min_strength) + L" ~ " + std::to_wstring(max_strength) + L"で入力してください。\n");
 		}
 
-		write_buffer += L"\n1 ~ 10で敵の強さを決めてください(スペックによっては7以下がおすすめです！)。\n";
+		write_buffer += L"\n" + std::to_wstring(min_strength) + L" ~ " + std::to_wstring(max_strength) + L"で敵の強さを決めてください(スペックによっては7以下がおすすめです！)。\n";
 		write_buffer += L">> ";
 
 		WriteMessage();
 	}
 
-	void MessageWriter::WriteRetryMessage(bool invalid)
+	void MessageWriter::WriteRetryMessage(const bool invalid)
 	{
 		if (invalid)
 		{
@@ -121,4 +120,3 @@ namespace Reversi
 		WriteMessage();
 	}
 }
-

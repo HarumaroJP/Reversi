@@ -16,11 +16,11 @@ namespace Reversi
 	public:
 		explicit SearchFuture();
 
-		void Initialize(const Board& origin, Side side);
-		void SetSearchDepth(int depth);
+		void Initialize(const Board& origin, const Side side);
+		void SetSearchDepth(const int depth);
 
 		//スレッドにスケジュールする関数
-		std::future<SearchResult> Schedule(u64 input);
+		std::future<SearchResult> Schedule(const u64 input);
 
 		//実際に探索を行う関数
 		SearchResult SearchBestMove();

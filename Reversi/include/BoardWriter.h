@@ -33,11 +33,11 @@ namespace Reversi
 		std::wstring defaultFontName;
 
 		//色情報を変更する文字列を取得する
-		std::wstring GetBackColorCode(int id) const;
-		std::wstring GetFrontColorCode(int id) const;
+		std::wstring GetBackColorCode(const int id) const;
+		std::wstring GetFrontColorCode(const int id) const;
 
 		//指定した位置の石情報を文字列に変換する
-		std::wstring ToStone(u64 black_data, u64 white_data, u64 legal_moves, int offset, u64 input) const;
+		std::wstring ToStone(const u64 black_data, const u64 white_data, const u64 legal_moves, const int offset, const u64 input) const;
 
 		void WriteAlphabets();
 		void WriteParts(const wchar_t& l_side, const wchar_t& m_side, const wchar_t& r_side);

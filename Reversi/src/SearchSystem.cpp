@@ -12,12 +12,20 @@ namespace Reversi
 
 	SearchResult SearchSystem::AlphaBetaSearch(const u64 point, int depth, int alpha, int beta, Side side)
 	{
+		// 実行速度を求めるならば、余計な処理を挟む前に評価しましょう。
+		//一番深くまで到達したら評価する
+		if (depth == 0)
+		{
+			int score = evaluator.Evaluate(evaluateSide);
+			return { score, point };
+		}
+
 		u64 legal_moves = board->GetLegalMoves(side);
 		bool is_max = evaluateSide == side;
 		SearchResult best = { is_max ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max(), 0 };
 
-		//一番深くまで到達したら or おけるマスが無くなったら評価する
-		if (depth == 0 || legal_moves == 0)
+		//おけるマスが無くなったら評価する
+		if (legal_moves == 0)
 		{
 			int score = evaluator.Evaluate(evaluateSide);
 			return { score, point };

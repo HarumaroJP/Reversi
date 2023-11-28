@@ -102,6 +102,10 @@ namespace Reversi
 		u64 black_board;
 		u64 white_board;
 
+		// ビット演算に使用する定数
+		static constexpr int SHIFT_VERTICAL = 8;
+		static constexpr int SHIFT_HORIZONTAL = 1;
+
 		static constexpr u64 horizontal_mask = 0x7e7e7e7e7e7e7e7e;
 		static constexpr u64 vertical_mask = 0x00FFFFFFFFFFFF00;
 		static constexpr u64 allSide_mask = horizontal_mask & vertical_mask;
@@ -113,6 +117,8 @@ namespace Reversi
 		u64 GetVerticalFlips(u64 input, u64 mine, u64 others) const;
 		u64 GetHorizontalFlips(u64 input, u64 mine, u64 others) const;
 		u64 GetDiagonalCrossFlips(u64 input, u64 mine, u64 others) const;
+
+		u64 GetShiftedMoves(const u64 mine, const u64 others, const u64 empties, const int shift) const;
+		u64 GetShiftedFlips(const u64 input, const u64 mine, const u64 others, const int shift) const;
 	};
 }
-

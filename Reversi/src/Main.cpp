@@ -18,26 +18,9 @@ int main()
 	//起動メッセージの表示
 	message_writer->WriteWelcomeMessage();
 
-	while (sequencer.GetState() != State::Stop)
-	{
-		//オセロボードの表示
-		sequencer.Refresh();
-
-		//ターン選択
-		sequencer.AskSelectTurn();
-
-		//敵の強さ選択
-		sequencer.AskSelectStrength();
-
-		//ゲーム中のループ
-		sequencer.InGameLoop();
-
-		if (sequencer.GetState() == State::End)
-		{
-			//リトライ選択
-			sequencer.AskRetry();
-		}
-	}
+	// main() はできる限りシンプルに保つと良いです。
+	// その意識をするだけで不必要に外部に公開している変数やメソッドを発見できます。
+	sequencer.Start();
 
 	return 0;
 }

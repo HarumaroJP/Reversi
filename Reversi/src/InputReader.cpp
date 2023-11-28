@@ -4,7 +4,14 @@ namespace Reversi
 {
 	bool InputReader::IsLegalCommand(const std::wstring& command) const
 	{
-		return L'a' <= command[0] && command[0] <= L'h' && L'1' <= command[1] && command[1] <= L'8';
+		// コード量が長くなるため、好みの問題ですが、
+		// 下記のようにすると判定している部分が直感的にわかり、可読性が上がります。
+		// また、内部処理では現状と同じ小文字で判定する形式にして、
+		// プレイヤーの入力は大文字を許可してもいいと思います。
+		bool isCulumnAtoH = (L'a' <= command[0] && command[0] <= L'h') || (L'A' <= command[0] && command[0] <= L'H');
+		bool isRow1To8 = L'1' <= command[1] && command[1] <= L'8';
+
+		return isCulumnAtoH && isRow1To8;
 	}
 
 	bool Command::IsLegalMove(Reversi::u64 legal_positions) const
@@ -16,7 +23,7 @@ namespace Reversi
 	{
 		std::wstring input;
 		State state;
-		u64 pos = 0;
+		u64 pos = 0ull;
 
 		WriteInitialMessage();
 
@@ -30,6 +37,10 @@ namespace Reversi
 			if (IsLegalCommand(input))
 			{
 				state = State::Set;
+
+				// 大文字を小文字に変換
+				input[0] = std::tolower(input[0]);
+
 				pos = CommandToBoard(input);
 				std::wcout << std::endl;
 			}
@@ -72,7 +83,4 @@ namespace Reversi
 
 		return 1ull << (8 * row + col);
 	}
-
-
 }
-

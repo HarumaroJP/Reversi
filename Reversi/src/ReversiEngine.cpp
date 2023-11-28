@@ -18,12 +18,12 @@ namespace Reversi
 		}
 	}
 
-	void ReversiEngine::SetEvaluateSide(Side side)
+	void ReversiEngine::SetEvaluateSide(const Side side)
 	{
 		evaluateSide = side;
 	}
 
-	void ReversiEngine::SetSearchDepth(int depth)
+	void ReversiEngine::SetSearchDepth(const int depth)
 	{
 		//探索深度の登録
 		max_depth = depth;
@@ -33,7 +33,7 @@ namespace Reversi
 		}
 	}
 
-	int ReversiEngine::GetSearchDepth()
+	int ReversiEngine::GetSearchDepth() const
 	{
 		return max_depth;
 	}
@@ -72,7 +72,7 @@ namespace Reversi
 			u64 input = 1ull << i;
 
 			//着手可能位置ではなかったらスキップ
-			if ((legal_moves & input) == 0)
+			if ((legal_moves & input) == 0ull)
 				continue;
 
 			input_queue.push(input);
@@ -80,8 +80,11 @@ namespace Reversi
 		future_count = input_queue.size();
 
 		//スレッド数分はとりあえず割り当てちゃう
-		for (int i = 0; i < tasks.size() && !input_queue.empty(); ++i)
+		for (int i = 0; i < tasks.size(); ++i)
 		{
+			if (input_queue.empty())
+				break;
+
 			futures[i] = tasks[i].Schedule(input_queue.front());
 			input_queue.pop();
 		}
@@ -107,6 +110,9 @@ namespace Reversi
 					if (!input_queue.empty())
 					{
 						futures[i] = tasks[i].Schedule(input_queue.front());
+
+						// popしわすれ？
+						input_queue.pop();
 					}
 
 					if (result.Score > best_move.Score)

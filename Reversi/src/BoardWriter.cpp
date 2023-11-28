@@ -134,7 +134,6 @@ namespace Reversi
 		}
 
 		return stone;
-
 	}
 
 	void BoardWriter::WriteParts(const wchar_t& l_side, const wchar_t& m_side, const wchar_t& r_side)
@@ -194,7 +193,3 @@ namespace Reversi
 	}
 
 }
-
-
-
-

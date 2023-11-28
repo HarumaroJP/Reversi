@@ -30,17 +30,17 @@ namespace Reversi
 	{
 	public:
 		GameSequencer(std::shared_ptr<Board>& board, std::shared_ptr<BoardWriter>& board_writer, std::shared_ptr<MessageWriter>& message_writer);
-
-		//ボードの更新
-		void Refresh();
-
-		void InGameLoop();
-		State GetState();
-
-		void AskSelectTurn();
-		void AskRetry();
-		void AskSelectStrength();
+	
+		void Start();
+	
 	private:
+		// 敵AIの強さ（探索の深さ）の定数
+		// マジックナンバーを定数化（または外部データとして所持）することで
+		// 容易に変更が可能になります。マジックナンバーにすると、
+		// 多くのコードを変更する必要が出るため注意が必要です。
+		const int MIN_STRENGTH = 1;
+		const int MAX_STRENGTH = 10;
+
 		std::shared_ptr<Board> board;
 		std::shared_ptr<BoardWriter> board_writer;
 		std::shared_ptr<MessageWriter> message_writer;
@@ -60,6 +60,15 @@ namespace Reversi
 		void ChangeTurn();
 		BoardInfo GetBoardInfo() const;
 		u64 GetRandomInput();
+
+		//ボードの更新
+		void Refresh();
+
+		void InGameLoop();
+
+		void AskSelectTurn();
+		void AskRetry();
+		void AskSelectStrength();
 	};
 }
 

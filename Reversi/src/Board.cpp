@@ -85,209 +85,97 @@ namespace Reversi
 	{
 		//上下端のマスを除く
 		u64 vertical_cells = others & vertical_mask;
-		u64 vertical_moves;
 
-		//シフトして配置可能マスを絞る
-		//高速化のためコンパイラ側で展開してもいいが、コードが複雑になるので手動で展開
-		//上
-		u64 tmp = vertical_cells & (mine << 8);
-		tmp |= vertical_cells & (tmp << 8);
-		tmp |= vertical_cells & (tmp << 8);
-		tmp |= vertical_cells & (tmp << 8);
-		tmp |= vertical_cells & (tmp << 8);
-		tmp |= vertical_cells & (tmp << 8);
-		vertical_moves = empties & (tmp << 8);
-
-		//下
-		tmp = vertical_cells & (mine >> 8);
-		tmp |= vertical_cells & (tmp >> 8);
-		tmp |= vertical_cells & (tmp >> 8);
-		tmp |= vertical_cells & (tmp >> 8);
-		tmp |= vertical_cells & (tmp >> 8);
-		tmp |= vertical_cells & (tmp >> 8);
-		vertical_moves |= empties & (tmp >> 8);
-
-		return vertical_moves;
+		return GetShiftedMoves(mine, vertical_cells, empties, SHIFT_VERTICAL);
 	}
 
 	u64 Board::GetHorizontalMoves(const u64 mine, const u64 others, const u64 empties) const
 	{
 		//左右端のマスを除く
 		u64 horizontal_cells = others & horizontal_mask;
-		u64 horizontal_moves;
 
-		//シフトして配置可能マスを絞る
-		//右
-		u64 tmp = horizontal_cells & (mine >> 1);
-		tmp |= horizontal_cells & (tmp >> 1);
-		tmp |= horizontal_cells & (tmp >> 1);
-		tmp |= horizontal_cells & (tmp >> 1);
-		tmp |= horizontal_cells & (tmp >> 1);
-		tmp |= horizontal_cells & (tmp >> 1);
-		horizontal_moves = empties & (tmp >> 1);
-
-		//左
-		tmp = horizontal_cells & (mine << 1);
-		tmp |= horizontal_cells & (tmp << 1);
-		tmp |= horizontal_cells & (tmp << 1);
-		tmp |= horizontal_cells & (tmp << 1);
-		tmp |= horizontal_cells & (tmp << 1);
-		tmp |= horizontal_cells & (tmp << 1);
-		horizontal_moves |= empties & (tmp << 1);
-
-		return horizontal_moves;
+		return GetShiftedMoves(mine, horizontal_cells, empties, SHIFT_HORIZONTAL);
 	}
 
 	u64 Board::GetCrossMoves(const u64 mine, const u64 others, const u64 empties) const
 	{
 		//すべての端のマスを除く
 		u64 cross_cells = others & allSide_mask;
-		u64 cross_moves;
 
-		//シフトして配置可能マスを絞る
-		//右上
-		u64 tmp = cross_cells & (mine << 7);
-		tmp |= cross_cells & (tmp << 7);
-		tmp |= cross_cells & (tmp << 7);
-		tmp |= cross_cells & (tmp << 7);
-		tmp |= cross_cells & (tmp << 7);
-		tmp |= cross_cells & (tmp << 7);
-		cross_moves = empties & (tmp << 7);
-
-		//左下
-		tmp = cross_cells & (mine >> 7);
-		tmp |= cross_cells & (tmp >> 7);
-		tmp |= cross_cells & (tmp >> 7);
-		tmp |= cross_cells & (tmp >> 7);
-		tmp |= cross_cells & (tmp >> 7);
-		tmp |= cross_cells & (tmp >> 7);
-		cross_moves |= empties & (tmp >> 7);
-
-		//右下
-		tmp = cross_cells & (mine >> 9);
-		tmp |= cross_cells & (tmp >> 9);
-		tmp |= cross_cells & (tmp >> 9);
-		tmp |= cross_cells & (tmp >> 9);
-		tmp |= cross_cells & (tmp >> 9);
-		tmp |= cross_cells & (tmp >> 9);
-		cross_moves |= empties & (tmp >> 9);
-
-		//左上
-		tmp = cross_cells & (mine << 9);
-		tmp |= cross_cells & (tmp << 9);
-		tmp |= cross_cells & (tmp << 9);
-		tmp |= cross_cells & (tmp << 9);
-		tmp |= cross_cells & (tmp << 9);
-		tmp |= cross_cells & (tmp << 9);
-		cross_moves |= empties & (tmp << 9);
-
-		return cross_moves;
+		return GetShiftedMoves(mine, cross_cells, empties, SHIFT_VERTICAL + SHIFT_HORIZONTAL) |
+			GetShiftedMoves(mine, cross_cells, empties, SHIFT_VERTICAL - SHIFT_HORIZONTAL);
 	}
-
 
 	u64 Board::GetHorizontalFlips(const u64 input, const u64 mine, const u64 others) const
 	{
 		u64 horizontal_cells = others & horizontal_mask;
-		u64 horizontal_flips;
 
-		//右
-		u64 flip = horizontal_cells & (input >> 1);
-		flip |= horizontal_cells & (flip >> 1);
-		flip |= horizontal_cells & (flip >> 1);
-		flip |= horizontal_cells & (flip >> 1);
-		flip |= horizontal_cells & (flip >> 1);
-		flip |= horizontal_cells & (flip >> 1);
-		flip |= horizontal_cells & (flip >> 1);
-		horizontal_flips = flip & -(long long)((mine & (flip >> 1)) != 0);
-
-		//左
-		flip = horizontal_cells & (input << 1);
-		flip |= horizontal_cells & (flip << 1);
-		flip |= horizontal_cells & (flip << 1);
-		flip |= horizontal_cells & (flip << 1);
-		flip |= horizontal_cells & (flip << 1);
-		flip |= horizontal_cells & (flip << 1);
-		flip |= horizontal_cells & (flip << 1);
-		horizontal_flips |= flip & -(long long)((mine & (flip << 1)) != 0);
-
-		return horizontal_flips;
+		return GetShiftedFlips(input, mine, horizontal_cells, SHIFT_HORIZONTAL);
 	}
 
 	u64 Board::GetVerticalFlips(const u64 input, const u64 mine, const u64 others) const
 	{
 		u64 vertical_cells = others & vertical_mask;
-		u64 vertical_flips;
 
-		//上
-		u64 flip = vertical_cells & (input << 8);
-		flip |= vertical_cells & (flip << 8);
-		flip |= vertical_cells & (flip << 8);
-		flip |= vertical_cells & (flip << 8);
-		flip |= vertical_cells & (flip << 8);
-		flip |= vertical_cells & (flip << 8);
-		flip |= vertical_cells & (flip << 8);
-		vertical_flips = flip & -(long long)((mine & (flip << 8)) != 0);
-
-		//下
-		flip = vertical_cells & (input >> 8);
-		flip |= vertical_cells & (flip >> 8);
-		flip |= vertical_cells & (flip >> 8);
-		flip |= vertical_cells & (flip >> 8);
-		flip |= vertical_cells & (flip >> 8);
-		flip |= vertical_cells & (flip >> 8);
-		flip |= vertical_cells & (flip >> 8);
-		vertical_flips |= flip & -(long long)((mine & (flip >> 8)) != 0);
-
-		return vertical_flips;
+		return GetShiftedFlips(input, mine, vertical_cells, SHIFT_VERTICAL);
 	}
-
 
 	u64 Board::GetDiagonalCrossFlips(const u64 input, const u64 mine, const u64 others) const
 	{
 		u64 cross_cells = others & allSide_mask;
-		u64 cross_flips;
 
-		//右上
-		u64 flip = cross_cells & (input << 7);
-		flip |= cross_cells & (flip << 7);
-		flip |= cross_cells & (flip << 7);
-		flip |= cross_cells & (flip << 7);
-		flip |= cross_cells & (flip << 7);
-		flip |= cross_cells & (flip << 7);
-		flip |= cross_cells & (flip << 7);
-		cross_flips = flip & -(long long)((mine & (flip << 7)) != 0);
+		return GetShiftedFlips(input, mine, cross_cells, SHIFT_VERTICAL - SHIFT_HORIZONTAL) |
+			GetShiftedFlips(input, mine, cross_cells, SHIFT_VERTICAL + SHIFT_HORIZONTAL);
+	}
 
-		//左下
-		flip = cross_cells & (input >> 7);
-		flip |= cross_cells & (flip >> 7);
-		flip |= cross_cells & (flip >> 7);
-		flip |= cross_cells & (flip >> 7);
-		flip |= cross_cells & (flip >> 7);
-		flip |= cross_cells & (flip >> 7);
-		flip |= cross_cells & (flip >> 7);
-		cross_flips |= flip & -(long long)((mine & (flip >> 7)) != 0);
+	u64 Board::GetShiftedMoves(const u64 mine, const u64 cells, const u64 empties, const int shift) const
+	{
+		u64 moves;
 
-		//右下
-		flip = cross_cells & (input >> 9);
-		flip |= cross_cells & (flip >> 9);
-		flip |= cross_cells & (flip >> 9);
-		flip |= cross_cells & (flip >> 9);
-		flip |= cross_cells & (flip >> 9);
-		flip |= cross_cells & (flip >> 9);
-		flip |= cross_cells & (flip >> 9);
-		cross_flips |= flip & -(long long)((mine & (flip >> 9)) != 0);
+		//シフトして配置可能マスを絞る
+		//高速化のためコンパイラ側で展開してもいいが、コードが複雑になるので手動で展開
+		u64 tmp = cells & (mine << shift);
+		tmp |= cells & (tmp << shift);
+		tmp |= cells & (tmp << shift);
+		tmp |= cells & (tmp << shift);
+		tmp |= cells & (tmp << shift);
+		tmp |= cells & (tmp << shift);
+		moves = empties & (tmp << shift);
 
-		//左上
-		flip = cross_cells & (input << 9);
-		flip |= cross_cells & (flip << 9);
-		flip |= cross_cells & (flip << 9);
-		flip |= cross_cells & (flip << 9);
-		flip |= cross_cells & (flip << 9);
-		flip |= cross_cells & (flip << 9);
-		flip |= cross_cells & (flip << 9);
-		cross_flips |= flip & -(long long)((mine & (flip << 9)) != 0);
+		tmp = cells & (mine >> shift);
+		tmp |= cells & (tmp >> shift);
+		tmp |= cells & (tmp >> shift);
+		tmp |= cells & (tmp >> shift);
+		tmp |= cells & (tmp >> shift);
+		tmp |= cells & (tmp >> shift);
+		moves |= empties & (tmp >> shift);
 
-		return cross_flips;
+		return moves;
+	}
+
+	u64 Board::GetShiftedFlips(const u64 input, const u64 mine, const u64 cells, const int shift) const
+	{
+		u64 flips = 0ull;
+
+		u64 flip = cells & (input >> shift);
+		flip |= cells & (flip >> shift);
+		flip |= cells & (flip >> shift);
+		flip |= cells & (flip >> shift);
+		flip |= cells & (flip >> shift);
+		flip |= cells & (flip >> shift);
+		flip |= cells & (flip >> shift);
+		flips = flip & -(long long)((mine & (flip >> shift)) != 0);
+
+		flip = cells & (input << shift);
+		flip |= cells & (flip << shift);
+		flip |= cells & (flip << shift);
+		flip |= cells & (flip << shift);
+		flip |= cells & (flip << shift);
+		flip |= cells & (flip << shift);
+		flip |= cells & (flip << shift);
+		flips |= flip & -(long long)((mine & (flip << shift)) != 0);
+
+		return flips;
 	}
 
 	u64 Board::GetCrossFloods(const u64 input, const u64 others) const
@@ -297,43 +185,43 @@ namespace Reversi
 		u64 floods;
 
 		//上
-		u64 flood = vertical_cells & (input << 8);
-		flood |= vertical_cells & (flood << 8);
-		flood |= vertical_cells & (flood << 8);
-		flood |= vertical_cells & (flood << 8);
-		flood |= vertical_cells & (flood << 8);
-		flood |= vertical_cells & (flood << 8);
-		flood |= vertical_cells & (flood << 8);
+		u64 flood = vertical_cells & (input << SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood << SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood << SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood << SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood << SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood << SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood << SHIFT_VERTICAL);
 		floods = flood;
 
 		//下
-		flood = vertical_cells & (input >> 8);
-		flood |= vertical_cells & (flood >> 8);
-		flood |= vertical_cells & (flood >> 8);
-		flood |= vertical_cells & (flood >> 8);
-		flood |= vertical_cells & (flood >> 8);
-		flood |= vertical_cells & (flood >> 8);
-		flood |= vertical_cells & (flood >> 8);
+		flood = vertical_cells & (input >> SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood >> SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood >> SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood >> SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood >> SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood >> SHIFT_VERTICAL);
+		flood |= vertical_cells & (flood >> SHIFT_VERTICAL);
 		floods |= flood;
 
 		//右
-		flood = horizontal_cells & (input >> 1);
-		flood |= horizontal_cells & (flood >> 1);
-		flood |= horizontal_cells & (flood >> 1);
-		flood |= horizontal_cells & (flood >> 1);
-		flood |= horizontal_cells & (flood >> 1);
-		flood |= horizontal_cells & (flood >> 1);
-		flood |= horizontal_cells & (flood >> 1);
+		flood = horizontal_cells & (input >> SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood >> SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood >> SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood >> SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood >> SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood >> SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood >> SHIFT_HORIZONTAL);
 		floods = flood;
 
 		//左
-		flood = horizontal_cells & (input << 1);
-		flood |= horizontal_cells & (flood << 1);
-		flood |= horizontal_cells & (flood << 1);
-		flood |= horizontal_cells & (flood << 1);
-		flood |= horizontal_cells & (flood << 1);
-		flood |= horizontal_cells & (flood << 1);
-		flood |= horizontal_cells & (flood << 1);
+		flood = horizontal_cells & (input << SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood << SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood << SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood << SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood << SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood << SHIFT_HORIZONTAL);
+		flood |= horizontal_cells & (flood << SHIFT_HORIZONTAL);
 		floods |= flood;
 
 		return floods;

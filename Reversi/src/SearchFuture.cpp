@@ -8,7 +8,7 @@ namespace Reversi
 		search_system = std::make_unique<SearchSystem>(board_buffer);
 	}
 
-	void SearchFuture::Initialize(const Board& origin, Side side)
+	void SearchFuture::Initialize(const Board& origin, const Side side)
 	{
 		search_system->evaluateSide = side;
 
@@ -16,7 +16,7 @@ namespace Reversi
 		board_buffer->Overwrite(origin);
 	}
 
-	std::future<SearchResult> SearchFuture::Schedule(u64 input)
+	std::future<SearchResult> SearchFuture::Schedule(const u64 input)
 	{
 		assigned_input = input;
 
@@ -45,10 +45,8 @@ namespace Reversi
 		return { info.Score, assigned_input };
 	}
 
-	void SearchFuture::SetSearchDepth(int max_depth)
+	void SearchFuture::SetSearchDepth(const int max_depth)
 	{
 		this->depth = max_depth;
 	}
 }
-
-
